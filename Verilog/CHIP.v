@@ -1,3 +1,31 @@
+module CONST();
+    // Constants
+    // RISC-V format
+    parameter R_TYPE = 7'b0110011; // arithmatic/logical ops
+    parameter I_TYPE = 7'b0010011; // immediates
+    parameter I_JALR = 7'b1100111;
+    parameter I_LOAD = 7'b0000011;
+    parameter S_TYPE = 7'b0100011; // store
+    parameter B_TYPE = 7'b1100011; // branch
+    parameter U_TYPE = 7'b0010111; // upper immediates
+    parameter UJ_JAL = 7'b1101111;
+
+    // ALUop signal
+    parameter ADD  = 4'b0000;
+    parameter SUB  = 4'b0001;
+    parameter SLL  = 4'b0010;
+    parameter SLT  = 4'b0011;
+    parameter SLTU = 4'b0100;
+    parameter XOR  = 4'b0101;
+    parameter SRL  = 4'b0110;
+    parameter SRA  = 4'b0111;
+    parameter OR   = 4'b1000;
+    parameter AND  = 4'b1001;
+    parameter MUL  = 4'b1010;
+    parameter DIV  = 4'b1011;
+
+endmodule
+
 // Your code
 module CHIP(clk,
             rst_n,
@@ -117,5 +145,49 @@ endmodule
 
 module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
     // Todo: your HW2
+
+endmodule
+
+module ALU_op_selector(
+    input   [6:0]   opcode,
+    input   [2:0]   funct3,
+    input   [6:0]   funct7,
+    output  reg [4:0]   ALUopSignal,
+);
+    always @(*) begin 
+        case(opcode)
+            CONST.R_TYPE : begin
+                if(funct7 == 7'b0000001) ALUopSignal = CONST.MUL;
+                else begin
+                    case(funct3):
+                        3'b000: ALUopSignal = funct7 == 0 ? CONST.ADD : CONST.SUB;
+                        3'b001: ALUopSignal = CONST.SLL;
+                        3'b010: ALUopSignal = CONST.SLT;
+                        3'b011: ALUopSignal = CONST.SLTU;
+                        3'b100: ALUopSignal = CONST.XOR;
+                        3'b101: ALUopSignal = funct7 == 0 ? CONST.SRL : CONST.SRA;
+                        3'b110: ALUopSignal = CONST.OR;
+                        3'b111: ALUopSignal = CONST.AND;
+                    endcase
+                end
+            end
+            CONST.I_TYPE : begin
+            end
+            CONST.I_JALR : begin
+            end
+            CONST.I_LOAD : begin
+            end
+            CONST.S_TYPE : begin
+            end
+            CONST.B_TYPE : begin
+            end
+            CONST.U_TYPE : begin
+            end
+            CONST.UJ_JAL : begin
+            end
+            default: begin
+            end
+        endcase
+    end
 
 endmodule
