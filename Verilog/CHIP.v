@@ -150,43 +150,58 @@ module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
 
 endmodule
 
+module Control(
+    input   [6:0]   opcode,
+    output  reg   [1:0] PCControl,
+    output  reg   Branch,
+    output  reg   MemRead,
+    output  reg   [1:0] MemtoReg,
+    output  reg   [2:0] ALUOp,
+    output  reg   MemWrite,
+    output  reg   ALUSrc,
+    output  reg   RegWrite
+);
+
+endmodule
+
+
 module ALUOpSelector(
     input   [6:0]   opcode,
     input   [2:0]   funct3,
     input   [6:0]   funct7,
-    output  reg [4:0]   ALUopSignal,
+    output  reg [4:0]   alu_op,
 );
     always @(*) begin 
         case(opcode)
             CONST.R_TYPE : begin
-                if(funct7 == 7'b0000001) ALUopSignal = CONST.MUL;
+                if(funct7 == 7'b0000001) alu_op = CONST.MUL;
                 else begin
                     case(funct3):
-                        3'b000: ALUopSignal = funct7 == 0 ? CONST.ADD : CONST.SUB;
-                        3'b001: ALUopSignal = CONST.SLL;
-                        3'b010: ALUopSignal = CONST.SLT;
-                        3'b011: ALUopSignal = CONST.SLTU;
-                        3'b100: ALUopSignal = CONST.XOR;
-                        3'b101: ALUopSignal = funct7 == 0 ? CONST.SRL : CONST.SRA;
-                        3'b110: ALUopSignal = CONST.OR;
-                        3'b111: ALUopSignal = CONST.AND;
+                        3'b000: alu_op = funct7 == 0 ? CONST.ADD : CONST.SUB;
+                        3'b001: alu_op = CONST.SLL;
+                        3'b010: alu_op = CONST.SLT;
+                        3'b011: alu_op = CONST.SLTU;
+                        3'b100: alu_op = CONST.XOR;
+                        3'b101: alu_op = funct7 == 0 ? CONST.SRL : CONST.SRA;
+                        3'b110: alu_op = CONST.OR;
+                        3'b111: alu_op = CONST.AND;
                     endcase
                 end
             end
             CONST.I_TYPE : begin
                 case(funct3):
-                    3'b000: ALUopSignal = CONST.ADD;    // addi
-                    3'b001: ALUopSignal = CONST.SSL;    // slli
-                    3'b010: ALUopSignal = CONST.SLT;    // slti
-                    3'b011: ALUopSignal = CONST.SLTT;   // sltiu
-                    3'b100: ALUopSignal = CONST.XOR;    // xori
-                    3'b101: ALUopSignal = funct7 == 0 ? CONST.SRL : CONST.SRA; // srli, srai
-                    3'b110: ALUopSignal = CONST.OR;     // or
-                    3'b111: ALUopSignal = CONST.AND;    // andi
+                    3'b000: alu_op = CONST.ADD;    // addi
+                    3'b001: alu_op = CONST.SSL;    // slli
+                    3'b010: alu_op = CONST.SLT;    // slti
+                    3'b011: alu_op = CONST.SLTT;   // sltiu
+                    3'b100: alu_op = CONST.XOR;    // xori
+                    3'b101: alu_op = funct7 == 0 ? CONST.SRL : CONST.SRA; // srli, srai
+                    3'b110: alu_op = CONST.OR;     // or
+                    3'b111: alu_op = CONST.AND;    // andi
                 endcase
             end
-            CONST.B_TYPE : ALUopSignal = CONST.SUB; // beq
-            default: ALUopSignal = CONST.ADD;
+            CONST.B_TYPE : alu_op = CONST.SUB; // beq
+            default: alu_op = CONST.ADD;
             
         endcase
     end
