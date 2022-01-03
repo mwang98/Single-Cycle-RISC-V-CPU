@@ -185,20 +185,9 @@ module ALUOpSelector(
                     3'b111: ALUopSignal = CONST.AND;    // andi
                 endcase
             end
-            CONST.I_JALR : begin
-            end
-            CONST.I_LOAD : begin
-            end
-            CONST.S_TYPE : begin
-            end
-            CONST.B_TYPE : begin
-            end
-            CONST.U_TYPE : begin
-            end
-            CONST.UJ_JAL : begin
-            end
-            default: begin
-            end
+            CONST.B_TYPE : ALUopSignal = CONST.SUB; // beq
+            default: ALUopSignal = CONST.ADD;
+            
         endcase
     end
 
