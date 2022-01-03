@@ -174,6 +174,16 @@ module ALUOpSelector(
                 end
             end
             CONST.I_TYPE : begin
+                case(funct3):
+                    3'b000: ALUopSignal = CONST.ADD;    // addi
+                    3'b001: ALUopSignal = CONST.SSL;    // slli
+                    3'b010: ALUopSignal = CONST.SLT;    // slti
+                    3'b011: ALUopSignal = CONST.SLTT;   // sltiu
+                    3'b100: ALUopSignal = CONST.XOR;    // xori
+                    3'b101: ALUopSignal = funct7 == 0 ? CONST.SRL : CONST.SRA; // srli, srai
+                    3'b110: ALUopSignal = CONST.OR;     // or
+                    3'b111: ALUopSignal = CONST.AND;    // andi
+                endcase
             end
             CONST.I_JALR : begin
             end
