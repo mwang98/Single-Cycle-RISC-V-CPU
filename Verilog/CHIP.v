@@ -152,56 +152,56 @@ endmodule
 
 module Control(
     input   [6:0]   opcode,
+    output  reg   is_branch,
+    output  reg   mem_to_reg,
     output  reg   [1:0] PCControl,
-    output  reg   Branch,
-    output  reg   MemRead,
-    output  reg   [1:0] MemtoReg,
     output  reg   [2:0] ALUOp,
-    output  reg   MemWrite,
-    output  reg   ALUSrc,
-    output  reg   RegWrite
+    output  reg   mem_read,
+    output  reg   mem_write,
+    output  reg   alu_src,
+    output  reg   reg_write
 );
 
 endmodule
 
 
-module ALUOpSelector(
+module ALUControl(
     input   [6:0]   opcode,
     input   [2:0]   funct3,
     input   [6:0]   funct7,
-    output  reg [4:0]   alu_op,
+    output  reg [4:0]   alu_ctrl,
 );
     always @(*) begin 
         case(opcode)
             CONST.R_TYPE : begin
-                if(funct7 == 7'b0000001) alu_op = CONST.MUL;
+                if(funct7 == 7'b0000001) alu_ctrl = CONST.MUL;
                 else begin
                     case(funct3):
-                        3'b000: alu_op = funct7 == 0 ? CONST.ADD : CONST.SUB;
-                        3'b001: alu_op = CONST.SLL;
-                        3'b010: alu_op = CONST.SLT;
-                        3'b011: alu_op = CONST.SLTU;
-                        3'b100: alu_op = CONST.XOR;
-                        3'b101: alu_op = funct7 == 0 ? CONST.SRL : CONST.SRA;
-                        3'b110: alu_op = CONST.OR;
-                        3'b111: alu_op = CONST.AND;
+                        3'b000: alu_ctrl = funct7 == 0 ? CONST.ADD : CONST.SUB;
+                        3'b001: alu_ctrl = CONST.SLL;
+                        3'b010: alu_ctrl = CONST.SLT;
+                        3'b011: alu_ctrl = CONST.SLTU;
+                        3'b100: alu_ctrl = CONST.XOR;
+                        3'b101: alu_ctrl = funct7 == 0 ? CONST.SRL : CONST.SRA;
+                        3'b110: alu_ctrl = CONST.OR;
+                        3'b111: alu_ctrl = CONST.AND;
                     endcase
                 end
             end
             CONST.I_TYPE : begin
                 case(funct3):
-                    3'b000: alu_op = CONST.ADD;    // addi
-                    3'b001: alu_op = CONST.SSL;    // slli
-                    3'b010: alu_op = CONST.SLT;    // slti
-                    3'b011: alu_op = CONST.SLTT;   // sltiu
-                    3'b100: alu_op = CONST.XOR;    // xori
-                    3'b101: alu_op = funct7 == 0 ? CONST.SRL : CONST.SRA; // srli, srai
-                    3'b110: alu_op = CONST.OR;     // or
-                    3'b111: alu_op = CONST.AND;    // andi
+                    3'b000: alu_ctrl = CONST.ADD;    // addi
+                    3'b001: alu_ctrl = CONST.SSL;    // slli
+                    3'b010: alu_ctrl = CONST.SLT;    // slti
+                    3'b011: alu_ctrl = CONST.SLTT;   // sltiu
+                    3'b100: alu_ctrl = CONST.XOR;    // xori
+                    3'b101: alu_ctrl = funct7 == 0 ? CONST.SRL : CONST.SRA; // srli, srai
+                    3'b110: alu_ctrl = CONST.OR;     // or
+                    3'b111: alu_ctrl = CONST.AND;    // andi
                 endcase
             end
-            CONST.B_TYPE : alu_op = CONST.SUB; // beq
-            default: alu_op = CONST.ADD;
+            CONST.B_TYPE : alu_ctrl = CONST.SUB; // beq
+            default: alu_ctrl = CONST.ADD;
             
         endcase
     end
