@@ -80,10 +80,12 @@ module CHIP(clk,
     // Todo: any combinational/sequential circuit
 
     // TODO: Decode instruction, determine instruction format (R, I, S, B)
+    // ALUOpSelector: parse instruction, retrieve needed operation
 
     // TODO: Define state: regular operation, multiplication
 
     // TODO: Design operations: ALU, jump, ...
+    // ALU: perform ALU operation
 
 
     // Update PC
@@ -148,7 +150,7 @@ module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
 
 endmodule
 
-module ALU_op_selector(
+module ALUOpSelector(
     input   [6:0]   opcode,
     input   [2:0]   funct3,
     input   [6:0]   funct7,
