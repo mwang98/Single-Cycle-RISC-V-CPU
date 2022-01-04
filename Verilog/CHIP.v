@@ -212,6 +212,7 @@ module CHIP(clk,
         if (!rst_n) PC <= 32'h00010000; // Do not modify this value!!!
         else PC <= PC_nxt;
     end
+
 endmodule
 
 module reg_file(clk, rst_n, wen, a1, a2, aw, d, q1, q2);
@@ -279,11 +280,8 @@ module IMMGEN(
             default: ext_imm = 0;
         endcase
     end
+
 endmodule
-
-module MUX4();
-endmodule 
-
 
 module ALU(
     input   clk,
@@ -326,7 +324,7 @@ module ALU(
         .output(muldiv_result)
     );
 
-    // next state logic
+    // next-state logic
     always @(*) begin
         case(state)
             OUT: begin
@@ -364,6 +362,7 @@ module ALU(
         if (!rst_n) state <= OUT;
         else state <= state_nxt;
     end
+
 endmodule
 
 module Control(
@@ -453,7 +452,6 @@ module Control(
 
 endmodule
 
-
 module ALUControl(
     input   [6:0]   opcode,
     input   [2:0]   funct3,
@@ -491,7 +489,7 @@ module ALUControl(
             end
             CONST.B_TYPE : alu_ctrl = CONST.SUB; // beq
             default: alu_ctrl = CONST.ADD;
-            
         endcase
     end
+    
 endmodule
