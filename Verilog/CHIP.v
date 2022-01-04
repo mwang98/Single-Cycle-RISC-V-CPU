@@ -1,3 +1,5 @@
+`include "Muldiv.v"
+
 module CONST();
     // Constants
     // RISC-V format
@@ -176,12 +178,15 @@ module reg_file(clk, rst_n, wen, a1, a2, aw, d, q1, q2);
     end
 endmodule
 
-module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
-    // Todo: your HW2
 
-endmodule
-
-module ALU();
+module ALU(
+    input   clk,
+    input   [31:0]  input1,
+    input   [31:0]  input2,
+    input   [4:0]   alu_ctrl,
+    output  [31:0]  result,
+    output  reg     state
+);
 
 endmodule
 
