@@ -178,9 +178,16 @@ module reg_file(clk, rst_n, wen, a1, a2, aw, d, q1, q2);
     end
 endmodule
 
+module IMMGEN();
+endmodule
+
+module MUX4();
+endmodule 
+
 
 module ALU(
     input   clk,
+    input   rst_n,
     input   [31:0]  input1,
     input   [31:0]  input2,
     input   [3:0]   alu_ctrl,
@@ -194,19 +201,17 @@ module ALU(
 
     reg [63:0] muldiv_result;
     reg [31:0] alu_result;
-    reg state = OUT;
-    reg state_nxt;
-    reg rst_n = 0;
+    reg state, state_nxt;
     wire valid;
     wire mode;
     wire ready;
 
-    // output
+    // output logic
     assign alu_ready = state == OUT;
     assign result = state == OUT ? alu_result : 0;
     assign alu_zero = state == OUT ? alu_result == 0 : 0;
 
-    // input
+    // MulDiv input
     assign valid = (alu_ctrl == CONST.MUL || alu_ctrl == CONST.DIV);
     assign mode = alu_ctrl == CONST.MUL;
 
@@ -221,7 +226,7 @@ module ALU(
         .output(muldiv_result)
     );
 
-    // Next state logic
+    // next state logic
     always @(*) begin
         case(state)
             OUT: begin
@@ -233,7 +238,7 @@ module ALU(
             COMP: state_nxt = ready == 1 ? OUT : COMP;
     end
 
-    // ALU logic
+    // combinational logic: ALU
     always @(*) begin
         case(alu_ctrl):
             CONST.ADD: alu_result = input1 + input2;
@@ -254,9 +259,10 @@ module ALU(
         endcase
     end
 
+    // sequential logic
     always @(posedge clk) begin
-        state <= state_nxt;
-        rst_n <= ready ? 0 : 1;
+        if (!rst_n) state <= OUT;
+        else state <= state_nxt;
     end
 endmodule
 
