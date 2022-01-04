@@ -93,7 +93,7 @@ module CHIP(clk,
     wire   [31:0] rd_data     ;              //
     //---------------------------------------//
 
-    // Todo: other wire/reg
+    // parse instruction
     wire    [24:0]  imm;
     wire    [6:0]   opcode;
     wire    [2:0]   funct3;
@@ -105,6 +105,15 @@ module CHIP(clk,
     assign rs2 = mem_rdata_I[24:20];
     assign funct7 = mem_rdata_I[25:31];
     assign imm = mem_rdata_I[31:7];
+
+    // control singal
+    reg is_branch;
+    reg [1:0] mem_to_reg;
+    reg [1:0] pc_ctrl;
+    reg mem_read;
+    reg mem_write;
+    reg alu_src;
+    reg reg_write;
     
     //---------------------------------------//
     // Do not modify this part!!!            //
@@ -120,8 +129,6 @@ module CHIP(clk,
         .q2(rs2_data));                      //
     //---------------------------------------//
     
-    // Todo: any combinational/sequential circuit
-
     // TODO: Decode instruction, determine instruction format (R, I, S, B)
     // ALUOpSelector: parse instruction, retrieve needed operation
 
@@ -129,6 +136,17 @@ module CHIP(clk,
 
     // TODO: Design operations: ALU, jump, ...
     // ALU: perform ALU operation
+
+    Control control(
+        .opcode(opcode),
+        .is_branch(is_branch),
+        .mem_to_reg(mem_to_reg),
+        .pc_ctrl(pc_ctrl),
+        .mem_read(mem_read),
+        .mem_write(mem_write),
+        .alu_src(alu_src),
+        .reg_write(reg_write)
+    );
 
 
     // Update PC
