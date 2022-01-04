@@ -178,7 +178,27 @@ module reg_file(clk, rst_n, wen, a1, a2, aw, d, q1, q2);
     end
 endmodule
 
-module IMMGEN();
+module IMMGEN(
+    input   [24:0]  instruc,
+    input   [6:0]   opcode,
+    output  [31:0]  imm
+);
+    reg [31:0] ext_imm;
+    assign imm = ext_imm;
+
+    always @(*) begin
+        case(opcode)
+            CONST.R_TYPE: ext_imm = 0;
+            CONST.I_TYPE: ext_imm = {{20{instruc[24]}}, instruc[24:13]};
+            CONST.I_JALR: ext_imm = {{20{instruc[24]}}, instruc[24:13]};
+            CONST.I_LOAD: ext_imm = {{20{instruc[24]}}, instruc[24:13]};
+            CONST.S_TYPE: ext_imm = {{20{instruc[24]}}, instruc[24:18], instruc[4:0]};
+            CONST.B_TYPE: ext_imm = {{20{instruc[24]}}, instruc[24], instruc[0], instruc[23:18], instruc[4:1]};
+            CONST.U_TYPE: ext_imm = {instruc[24:5] ,12'b0};
+            CONST.UJ_JAL: ext_imm = {{12{instruc[24]}}, instruc[24], instruc[12:5], instruc[13], instruc[23:14]};
+            default: ext_imm = 0;
+        endcase
+    end
 endmodule
 
 module MUX4();
