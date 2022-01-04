@@ -114,7 +114,17 @@ module CHIP(clk,
     reg mem_write;
     reg alu_src;
     reg reg_write;
-    
+
+    assign regWrite = reg_write;
+
+    // var
+    reg [4:0] alu_ctrl;
+    reg [31:0] extended_imm;
+    wire alu_zero;
+    wire alu_ready;
+    wire [31:0] alu_result;
+    wire [31:0] alu_input2;
+
     //---------------------------------------//
     // Do not modify this part!!!            //
     reg_file reg0(                           //
@@ -128,15 +138,8 @@ module CHIP(clk,
         .q1(rs1_data),                       //
         .q2(rs2_data));                      //
     //---------------------------------------//
-    
-    // TODO: Decode instruction, determine instruction format (R, I, S, B)
-    // ALUOpSelector: parse instruction, retrieve needed operation
 
-    // TODO: Define state: regular operation, multiplication
-
-    // TODO: Design operations: ALU, jump, ...
-    // ALU: perform ALU operation
-
+    // compute control signal
     Control control(
         .opcode(opcode),
         .is_branch(is_branch),
@@ -147,18 +150,67 @@ module CHIP(clk,
         .alu_src(alu_src),
         .reg_write(reg_write)
     );
+    ALUControl alu_control(
+        .opcode(opcode),
+        .funct3(funct3),
+        .funct7(funct7),
+        .alu_ctrl(alu_ctrl)
+    );
 
+    // sign-extended immediate
+    IMMGEN imm_gen(
+        .instruc(imm),
+        .opcode(opcode),
+        .imm(extended_imm)
+    );
+
+    // select alu input2
+    case(alu_src)
+        CONST.FROM_IMM: assign alu_input2 = extended_imm;
+        CONST.FROM_RS2: assign alu_input2 = rs2_data;
+    endcase
+
+    ALU alu(
+        .clk(clk),
+        .rst_n(rst_n),
+        .input1(rs1_data),
+        .input2(alu_input2),
+        .alu_ctrl(alu_ctrl),
+        .result(alu_result),
+        .alu_zero(alu_zero),
+        .alu_ready(alu_ready),
+    );
+
+    // select data written to reg
+    case(mem_to_reg)
+        MEM2REG_PC_PLUS_4: assign rd_data = PC + 4;
+        MEM2REG_ALU: assign rd_data = alu_result;
+        MEM2REG_MEM: assign rd_data = mem_rdata_D;
+        MEM2REG_PC_PLUS_IMM: assign rd_data = PC + extended_imm;
+    endcase
+
+    // select next-state PC
+    always @(*) begin
+        if(alu_ready) begin
+            case(pc_ctrl)
+                PCCTRL_PC_PLUS_IMM: PC_nxt = PC + extended_imm << 1;
+                PCCTRL_RS1_PLUS_IMM: PC_nxt = rs1_data + extended_imm;
+                PCCTRL_PC_PLUS_4: PC_nxt = PC + 4;
+            endcase
+        end
+        else PC_nxt = PC;
+    end
+
+    // output
+    assign mem_wen_D = mem_write;
+    assign mem_addr_D = alu_result;
+    assign mem_wdata_D = mem_write ? rs2_data : 0;
+    assign mem_addr_I = PC;
 
     // Update PC
     always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            PC <= 32'h00010000; // Do not modify this value!!!
-            
-        end
-        else begin
-            PC <= PC_nxt;
-            
-        end
+        if (!rst_n) PC <= 32'h00010000; // Do not modify this value!!!
+        else PC <= PC_nxt;
     end
 endmodule
 
