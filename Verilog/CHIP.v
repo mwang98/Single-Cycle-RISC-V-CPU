@@ -85,7 +85,7 @@ module CHIP(clk,
     // Do not modify this part!!!            //
     // Exception: You may change wire to reg //
     reg    [31:0] PC          ;              //
-    wire   [31:0] PC_nxt      ;              //
+    reg    [31:0] PC_nxt      ;              //
     wire          regWrite    ;              //
     wire   [ 4:0] rs1, rs2, rd;              //
     wire   [31:0] rs1_data    ;              //
@@ -94,8 +94,18 @@ module CHIP(clk,
     //---------------------------------------//
 
     // Todo: other wire/reg
+    wire    [24:0]  imm;
+    wire    [6:0]   opcode;
+    wire    [2:0]   funct3;
+    wire    [6:0]   funct7;
+    assign opcode = mem_rdata_I[6:0];
+    assign rd = mem_rdata_I[7:11];
+    assign funct3 = mem_rdata_I[14:12];
+    assign rs1 = mem_rdata_I[19:15];
+    assign rs2 = mem_rdata_I[24:20];
+    assign funct7 = mem_rdata_I[25:31];
+    assign imm = mem_rdata_I[31:7];
     
-
     //---------------------------------------//
     // Do not modify this part!!!            //
     reg_file reg0(                           //
