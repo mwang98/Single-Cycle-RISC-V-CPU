@@ -181,6 +181,10 @@ module mulDiv(clk, rst_n, valid, ready, mode, in_A, in_B, out);
 
 endmodule
 
+module ALU();
+
+endmodule
+
 module Control(
     input   [6:0]   opcode,
     output  reg   is_branch,
