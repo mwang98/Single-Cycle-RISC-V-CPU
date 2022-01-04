@@ -3,8 +3,8 @@ module MulDiv(
     input rst_n,
     input valid,
     input mode,
-    output ready,
     input  [31:0] in_A,
+    output ready,
     input  [31:0] in_B,
     output [63:0] out
 );

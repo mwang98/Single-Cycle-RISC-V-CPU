@@ -183,11 +183,81 @@ module ALU(
     input   clk,
     input   [31:0]  input1,
     input   [31:0]  input2,
-    input   [4:0]   alu_ctrl,
+    input   [3:0]   alu_ctrl,
     output  [31:0]  result,
-    output  reg     state
+    output  alu_zero,
+    output  alu_ready
 );
+    // Definition of states
+    parameter OUT  = 0;
+    parameter COMP = 1;
 
+    reg [63:0] muldiv_result;
+    reg [31:0] alu_result;
+    reg state = OUT;
+    reg state_nxt;
+    reg rst_n = 0;
+    wire valid;
+    wire mode;
+    wire ready;
+
+    // output
+    assign alu_ready = state == OUT;
+    assign result = state == OUT ? alu_result : 0;
+    assign alu_zero = state == OUT ? alu_result == 0 : 0;
+
+    // input
+    assign valid = (alu_ctrl == CONST.MUL || alu_ctrl == CONST.DIV);
+    assign mode = alu_ctrl == CONST.MUL;
+
+    MulDiv muldiv(
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid(valid),
+        .mode(mode),
+        .in_A(input1),
+        .in_B(input2),
+        .ready(ready),
+        .output(muldiv_result)
+    );
+
+    // Next state logic
+    always @(*) begin
+        case(state)
+            OUT: begin
+                if(alu_ctrl == CONST.MUL or alu_ctrl == CONST.DIV)
+                    state_nxt = COMP;
+                else
+                    state_nxt = OUT;
+            end
+            COMP: state_nxt = ready == 1 ? OUT : COMP;
+    end
+
+    // ALU logic
+    always @(*) begin
+        case(alu_ctrl):
+            CONST.ADD: alu_result = input1 + input2;
+            CONST.SUB: alu_result = input1 - input2;
+            CONST.SLL: alu_result = input1 << input2;
+            CONST.SLT: begin
+                if(input1[31] ^ input2[31]) alu_result = input1[31] == 0;
+                else alu_result = input1[31] == 0 ? input1 < input2 : input1 > input2;
+            end
+            CONST.SLIU: alu_result = input1 < input2;
+            CONST.XOR: alu_result = input1 ^ input2;
+            CONST.SRL: alu_result = input1 >>> input2;
+            CONST.SRA: alu_result = input1 >> input2;
+            CONST.OR: alu_result = input1 | input2;
+            CONST.AND: alu_result = input1 & input2;
+            CONST.MUL: alu_result = muldiv_result[31:0];
+            default: alu_result = 0;
+        endcase
+    end
+
+    always @(posedge clk) begin
+        state <= state_nxt;
+        rst_n <= ready ? 0 : 1;
+    end
 endmodule
 
 module Control(
