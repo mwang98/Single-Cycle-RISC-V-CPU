@@ -193,9 +193,76 @@ module Control(
 );
     case(opcode)
         CONST.R_TYPE : begin
-            is_branch = 0;
-            mem_to_reg = 2'b01;
-            pc_ctrl = 2'b10;
+            is_branch   = CONST.ISN_BRANCH;
+            mem_to_reg  = CONST.MEM2REG_ALU;
+            pc_ctrl     = CONST.PCCTRL_PC_PLUS_4;
+            mem_read    = CONST.ISN_MEMREAD;
+            mem_write   = CONST.ISN_MEMWRITE;
+            alu_src     = CONST.FROM_RS2;
+            reg_write   = CONST.IS_REGWRITE;
+        end
+        CONST.I_TYPE : begin
+            is_branch   = CONST.ISN_BRANCH;
+            mem_to_reg  = CONST.MEM2REG_ALU;
+            pc_ctrl     = CONST.PCCTRL_PC_PLUS_4;
+            mem_read    = CONST.ISN_MEMREAD;
+            mem_write   = CONST.ISN_MEMWRITE;
+            alu_src     = CONST.FROM_IMM;
+            reg_write   = CONST.IS_REGWRITE;
+        end
+        CONST.I_JALR : begin
+            is_branch   = CONST.ISN_BRANCH;
+            mem_to_reg  = CONST.MEM2REG_PC_PLUS_4;
+            pc_ctrl     = CONST.PCCTRL_RS1_PLUS_IMM;
+            mem_read    = CONST.ISN_MEMREAD;
+            mem_write   = CONST.ISN_MEMWRITE;
+            alu_src     = CONST.FROM_IMM;
+            reg_write   = CONST.IS_REGWRITE;
+        end
+        CONST.I_LOAD : begin
+            is_branch   = CONST.ISN_BRANCH;
+            mem_to_reg  = CONST.MEM2REG_MEM;
+            pc_ctrl     = CONST.PCCTRL_PC_PLUS_4;
+            mem_read    = CONST.IS_MEMREAD;
+            mem_write   = CONST.ISN_MEMWRITE;
+            alu_src     = CONST.FROM_IMM;
+            reg_write   = CONST.IS_REGWRITE;
+        end
+        CONST.S_TYPE : begin
+            is_branch   = CONST.ISN_BRANCH;
+            mem_to_reg  = CONST.MEM2REG_MEM;
+            pc_ctrl     = CONST.PCCTRL_PC_PLUS_4;
+            mem_read    = CONST.ISN_MEMREAD;
+            mem_write   = CONST.IS_MEMWRITE;
+            alu_src     = CONST.FROM_IMM;
+            reg_write   = CONST.ISN_REGWRITE;
+        end
+        CONST.B_TYPE : begin
+            is_branch   = CONST.IS_BRANCH;
+            mem_to_reg  = CONST.MEM2REG_ALU;
+            pc_ctrl     = CONST.PCCTRL_PC_PLUS_IMM;
+            mem_read    = CONST.ISN_MEMREAD;
+            mem_write   = CONST.ISN_MEMWRITE;
+            alu_src     = CONST.FROM_RS2;
+            reg_write   = CONST.ISN_REGWRITE;
+        end
+        CONST.U_TYPE : begin
+            is_branch   = CONST.ISN_BRANCH;
+            mem_to_reg  = CONST.MEM2REG_PC_PLUS_IMM;
+            pc_ctrl     = CONST.PCCTRL_PC_PLUS_4;
+            mem_read    = CONST.ISN_MEMREAD;
+            mem_write   = CONST.ISN_MEMWRITE;
+            alu_src     = CONST.FROM_RS2;
+            reg_write   = CONST.IS_REGWRITE;
+        end
+        CONST.UJ_JAL : begin
+            is_branch   = CONST.ISN_BRANCH;
+            mem_to_reg  = CONST.MEM2REG_PC_PLUS_4;
+            pc_ctrl     = CONST.PCCTRL_PC_PLUS_IMM;
+            mem_read    = CONST.ISN_MEMREAD;
+            mem_write   = CONST.ISN_MEMWRITE;
+            alu_src     = CONST.FROM_IMM;
+            reg_write   = CONST.IS_REGWRITE;
         end
     endcase
 
