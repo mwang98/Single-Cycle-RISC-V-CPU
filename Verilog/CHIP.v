@@ -10,7 +10,7 @@ module CONST();
     parameter U_TYPE = 7'b0010111; // upper immediates
     parameter UJ_JAL = 7'b1101111;
 
-    // ALUop signal
+    // ALUCtrl signal
     parameter ADD  = 4'b0000;
     parameter SUB  = 4'b0001;
     parameter SLL  = 4'b0010;
@@ -23,6 +23,37 @@ module CONST();
     parameter AND  = 4'b1001;
     parameter MUL  = 4'b1010;
     parameter DIV  = 4'b1011;
+
+    // Branch
+    parameter ISN_BRANCH = 0;
+    parameter IS_BRANCH = 1;
+
+    // MemRead
+    parameter ISN_MEMREAD = 0;
+    parameter IS_MEMREAD = 1;
+    
+    // MemWrite
+    parameter ISN_MEMWRITE = 0;
+    parameter IS_MEMWRITE = 1;
+
+    // RegWrite
+    parameter ISN_REGWRITE = 0;
+    parameter IS_REGWRITE = 1;
+
+    // MemtoReg
+    parameter MEM2REG_PC_PLUS_4 = 2'b00;
+    parameter MEM2REG_ALU = 2'b01;
+    parameter MEM2REG_MEM = 2'b10;
+    parameter MEM2REG_PC_PLUS_IMM = 2'b11;
+
+    // ALUSrc
+    parameter FROM_IMM = 1;
+    parameter FROM_RS2 = 0;
+
+    // PCCtrl
+    parameter PCCTRL_PC_PLUS_IMM = 2'b00;
+    parameter PCCTRL_RS1_PLUS_IMM = 2'b01;
+    parameter PCCTRL_PC_PLUS_4 = 2'b10;
 
 endmodule
 
@@ -153,14 +184,20 @@ endmodule
 module Control(
     input   [6:0]   opcode,
     output  reg   is_branch,
-    output  reg   mem_to_reg,
-    output  reg   [1:0] PCControl,
-    output  reg   [2:0] ALUOp,
+    output  reg   [1:0] mem_to_reg,
+    output  reg   [1:0] pc_ctrl,
     output  reg   mem_read,
     output  reg   mem_write,
     output  reg   alu_src,
     output  reg   reg_write
 );
+    case(opcode)
+        CONST.R_TYPE : begin
+            is_branch = 0;
+            mem_to_reg = 2'b01;
+            pc_ctrl = 2'b10;
+        end
+    endcase
 
 endmodule
 
