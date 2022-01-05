@@ -97,7 +97,7 @@ module CHIP(clk,
     wire    [2:0]   funct3;
     wire    [6:0]   funct7;
     assign opcode = mem_rdata_I[6:0];
-    assign rd = mem_rdata_I[7:11];
+    assign rd = mem_rdata_I[11:7];
     assign funct3 = mem_rdata_I[14:12];
     assign rs1 = mem_rdata_I[19:15];
     assign rs2 = mem_rdata_I[24:20];
@@ -116,7 +116,7 @@ module CHIP(clk,
     assign regWrite = reg_write;
 
     // var
-    wire [4:0] alu_ctrl;
+    wire [3:0] alu_ctrl;
     wire [31:0] extended_imm;
     wire alu_zero;
     wire alu_ready;
@@ -299,9 +299,9 @@ module ALU(
     parameter OUT  = 0;
     parameter COMP = 1;
 
-    reg [63:0] muldiv_result;
     reg [31:0] alu_result;
     reg state, state_nxt;
+    wire [63:0] muldiv_result;
     wire valid;
     wire mode;
     wire ready;
