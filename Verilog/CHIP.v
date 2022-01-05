@@ -104,20 +104,20 @@ module CHIP(clk,
     assign funct7 = mem_rdata_I[25:31];
     assign imm = mem_rdata_I[31:7];
 
-    // control singal
-    reg is_branch;
-    reg [1:0] mem_to_reg;
-    reg [1:0] pc_ctrl;
-    reg mem_read;
-    reg mem_write;
-    reg alu_src;
-    reg reg_write;
+    // control signal
+    wire is_branch;
+    wire [1:0] mem_to_reg;
+    wire [1:0] pc_ctrl;
+    wire mem_read;
+    wire mem_write;
+    wire alu_src;
+    wire reg_write;
 
     assign regWrite = reg_write;
 
     // var
-    reg [4:0] alu_ctrl;
-    reg [31:0] extended_imm;
+    wire [4:0] alu_ctrl;
+    wire [31:0] extended_imm;
     wire alu_zero;
     wire alu_ready;
     wire [31:0] alu_result;
