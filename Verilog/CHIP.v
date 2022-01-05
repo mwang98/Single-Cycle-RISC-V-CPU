@@ -101,7 +101,7 @@ module CHIP(clk,
     assign funct3 = mem_rdata_I[14:12];
     assign rs1 = mem_rdata_I[19:15];
     assign rs2 = mem_rdata_I[24:20];
-    assign funct7 = mem_rdata_I[25:31];
+    assign funct7 = mem_rdata_I[31:25];
     assign imm = mem_rdata_I[31:7];
 
     // control signal
