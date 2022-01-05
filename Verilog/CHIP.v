@@ -456,7 +456,7 @@ module ALUControl(
     input   [6:0]   opcode,
     input   [2:0]   funct3,
     input   [6:0]   funct7,
-    output  reg [4:0]   alu_ctrl
+    output  reg [3:0]   alu_ctrl
 );
     always @(*) begin 
         case(opcode)
