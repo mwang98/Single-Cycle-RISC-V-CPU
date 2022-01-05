@@ -1,63 +1,61 @@
-`include "Muldiv.v"
+`include "MulDiv.v"
 
-module CONST();
-    // Constants
-    // RISC-V format
-    parameter R_TYPE = 7'b0110011; // arithmatic/logical ops
-    parameter I_TYPE = 7'b0010011; // immediates
-    parameter I_JALR = 7'b1100111;
-    parameter I_LOAD = 7'b0000011;
-    parameter S_TYPE = 7'b0100011; // store
-    parameter B_TYPE = 7'b1100011; // branch
-    parameter U_TYPE = 7'b0010111; // upper immediates
-    parameter UJ_JAL = 7'b1101111;
+// Constants
+// RISC-V format
+`define R_TYPE 7'b0110011 // arithmatic/logical ops
+`define I_TYPE 7'b0010011 // immediates
+`define I_JALR 7'b1100111
+`define I_LOAD 7'b0000011
+`define S_TYPE 7'b0100011 // store
+`define B_TYPE 7'b1100011 // branch
+`define U_TYPE 7'b0010111 // upper immediates
+`define UJ_JAL 7'b1101111
 
-    // ALUCtrl signal
-    parameter ADD  = 4'b0000;
-    parameter SUB  = 4'b0001;
-    parameter SLL  = 4'b0010;
-    parameter SLT  = 4'b0011;
-    parameter SLTU = 4'b0100;
-    parameter XOR  = 4'b0101;
-    parameter SRL  = 4'b0110;
-    parameter SRA  = 4'b0111;
-    parameter OR   = 4'b1000;
-    parameter AND  = 4'b1001;
-    parameter MUL  = 4'b1010;
-    parameter DIV  = 4'b1011;
+// ALUCtrl signal
+`define ADD  4'b0000
+`define SUB  4'b0001
+`define SLL  4'b0010
+`define SLT  4'b0011
+`define SLTU 4'b0100
+`define XOR  4'b0101
+`define SRL  4'b0110
+`define SRA  4'b0111
+`define OR   4'b1000
+`define AND  4'b1001
+`define MUL  4'b1010
+`define DIV  4'b1011
 
-    // Branch
-    parameter ISN_BRANCH = 0;
-    parameter IS_BRANCH = 1;
+// Branch
+`define ISN_BRANCH 1'b0
+`define IS_BRANCH 1'b1
 
-    // MemRead
-    parameter ISN_MEMREAD = 0;
-    parameter IS_MEMREAD = 1;
-    
-    // MemWrite
-    parameter ISN_MEMWRITE = 0;
-    parameter IS_MEMWRITE = 1;
+// MemRead
+`define ISN_MEMREAD 1'b0
+`define IS_MEMREAD 1'b1
 
-    // RegWrite
-    parameter ISN_REGWRITE = 0;
-    parameter IS_REGWRITE = 1;
+// MemWrite
+`define ISN_MEMWRITE 1'b0
+`define IS_MEMWRITE 1'b1
 
-    // MemtoReg
-    parameter MEM2REG_PC_PLUS_4 = 2'b00;
-    parameter MEM2REG_ALU = 2'b01;
-    parameter MEM2REG_MEM = 2'b10;
-    parameter MEM2REG_PC_PLUS_IMM = 2'b11;
+// RegWrite
+`define ISN_REGWRITE 1'b0
+`define IS_REGWRITE 1'b1
 
-    // ALUSrc
-    parameter FROM_IMM = 1;
-    parameter FROM_RS2 = 0;
+// MemtoReg
+`define MEM2REG_PC_PLUS_4 2'b00
+`define MEM2REG_ALU 2'b01
+`define MEM2REG_MEM 2'b10
+`define MEM2REG_PC_PLUS_IMM 2'b11
 
-    // PCCtrl
-    parameter PCCTRL_PC_PLUS_IMM = 2'b00;
-    parameter PCCTRL_RS1_PLUS_IMM = 2'b01;
-    parameter PCCTRL_PC_PLUS_4 = 2'b10;
+// ALUSrc
+`define FROM_IMM 1'b1
+`define FROM_RS2 1'b0
 
-endmodule
+// PCCtrl
+`define PCCTRL_PC_PLUS_IMM 2'b00
+`define PCCTRL_RS1_PLUS_IMM 2'b01
+`define PCCTRL_PC_PLUS_4 2'b10
+
 
 // Your code
 module CHIP(clk,
@@ -166,8 +164,8 @@ module CHIP(clk,
 
     // select alu input2
     case(alu_src)
-        CONST.FROM_IMM: assign alu_input2 = extended_imm;
-        CONST.FROM_RS2: assign alu_input2 = rs2_data;
+        `FROM_IMM: assign alu_input2 = extended_imm;
+        `FROM_RS2: assign alu_input2 = rs2_data;
     endcase
 
     ALU alu(
@@ -269,14 +267,14 @@ module IMMGEN(
 
     always @(*) begin
         case(opcode)
-            CONST.R_TYPE: ext_imm = 0;
-            CONST.I_TYPE: ext_imm = {{20{instruc[24]}}, instruc[24:13]};
-            CONST.I_JALR: ext_imm = {{20{instruc[24]}}, instruc[24:13]};
-            CONST.I_LOAD: ext_imm = {{20{instruc[24]}}, instruc[24:13]};
-            CONST.S_TYPE: ext_imm = {{20{instruc[24]}}, instruc[24:18], instruc[4:0]};
-            CONST.B_TYPE: ext_imm = {{20{instruc[24]}}, instruc[24], instruc[0], instruc[23:18], instruc[4:1]};
-            CONST.U_TYPE: ext_imm = {instruc[24:5] ,12'b0};
-            CONST.UJ_JAL: ext_imm = {{12{instruc[24]}}, instruc[24], instruc[12:5], instruc[13], instruc[23:14]};
+            `R_TYPE: ext_imm = 0;
+            `I_TYPE: ext_imm = {{20{instruc[24]}}, instruc[24:13]};
+            `I_JALR: ext_imm = {{20{instruc[24]}}, instruc[24:13]};
+            `I_LOAD: ext_imm = {{20{instruc[24]}}, instruc[24:13]};
+            `S_TYPE: ext_imm = {{20{instruc[24]}}, instruc[24:18], instruc[4:0]};
+            `B_TYPE: ext_imm = {{20{instruc[24]}}, instruc[24], instruc[0], instruc[23:18], instruc[4:1]};
+            `U_TYPE: ext_imm = {instruc[24:5] ,12'b0};
+            `UJ_JAL: ext_imm = {{12{instruc[24]}}, instruc[24], instruc[12:5], instruc[13], instruc[23:14]};
             default: ext_imm = 0;
         endcase
     end
@@ -310,8 +308,8 @@ module ALU(
     assign alu_zero = state == OUT ? alu_result == 0 : 0;
 
     // MulDiv input
-    assign valid = (alu_ctrl == CONST.MUL || alu_ctrl == CONST.DIV);
-    assign mode = alu_ctrl == CONST.MUL;
+    assign valid = (alu_ctrl == `MUL || alu_ctrl == `DIV);
+    assign mode = alu_ctrl == `MUL;
 
     MulDiv muldiv(
         .clk(clk),
@@ -321,38 +319,34 @@ module ALU(
         .in_A(input1),
         .in_B(input2),
         .ready(ready),
-        .output(muldiv_result)
+        .out(muldiv_result)
     );
 
     // next-state logic
     always @(*) begin
         case(state)
-            OUT: begin
-                if(alu_ctrl == CONST.MUL or alu_ctrl == CONST.DIV)
-                    state_nxt = COMP;
-                else
-                    state_nxt = OUT;
-            end
+            OUT: state_nxt = (alu_ctrl == `MUL || alu_ctrl == `DIV) ? COMP : OUT;
             COMP: state_nxt = ready == 1 ? OUT : COMP;
+        endcase
     end
 
     // combinational logic: ALU
     always @(*) begin
-        case(alu_ctrl):
-            CONST.ADD: alu_result = input1 + input2;
-            CONST.SUB: alu_result = input1 - input2;
-            CONST.SLL: alu_result = input1 << input2;
-            CONST.SLT: begin
+        case(alu_ctrl)
+            `ADD: alu_result = input1 + input2;
+            `SUB: alu_result = input1 - input2;
+            `SLL: alu_result = input1 << input2;
+            `SLT: begin
                 if(input1[31] ^ input2[31]) alu_result = input1[31] == 0;
                 else alu_result = input1[31] == 0 ? input1 < input2 : input1 > input2;
             end
-            CONST.SLIU: alu_result = input1 < input2;
-            CONST.XOR: alu_result = input1 ^ input2;
-            CONST.SRL: alu_result = input1 >>> input2;
-            CONST.SRA: alu_result = input1 >> input2;
-            CONST.OR: alu_result = input1 | input2;
-            CONST.AND: alu_result = input1 & input2;
-            CONST.MUL: alu_result = muldiv_result[31:0];
+            `SLTU: alu_result = input1 < input2;
+            `XOR: alu_result = input1 ^ input2;
+            `SRL: alu_result = input1 >>> input2;
+            `SRA: alu_result = input1 >> input2;
+            `OR: alu_result = input1 | input2;
+            `AND: alu_result = input1 & input2;
+            `MUL: alu_result = muldiv_result[31:0];
             default: alu_result = 0;
         endcase
     end
@@ -375,80 +369,82 @@ module Control(
     output  reg   alu_src,
     output  reg   reg_write
 );
-    case(opcode)
-        CONST.R_TYPE : begin
-            is_branch   = CONST.ISN_BRANCH;
-            mem_to_reg  = CONST.MEM2REG_ALU;
-            pc_ctrl     = CONST.PCCTRL_PC_PLUS_4;
-            mem_read    = CONST.ISN_MEMREAD;
-            mem_write   = CONST.ISN_MEMWRITE;
-            alu_src     = CONST.FROM_RS2;
-            reg_write   = CONST.IS_REGWRITE;
-        end
-        CONST.I_TYPE : begin
-            is_branch   = CONST.ISN_BRANCH;
-            mem_to_reg  = CONST.MEM2REG_ALU;
-            pc_ctrl     = CONST.PCCTRL_PC_PLUS_4;
-            mem_read    = CONST.ISN_MEMREAD;
-            mem_write   = CONST.ISN_MEMWRITE;
-            alu_src     = CONST.FROM_IMM;
-            reg_write   = CONST.IS_REGWRITE;
-        end
-        CONST.I_JALR : begin
-            is_branch   = CONST.ISN_BRANCH;
-            mem_to_reg  = CONST.MEM2REG_PC_PLUS_4;
-            pc_ctrl     = CONST.PCCTRL_RS1_PLUS_IMM;
-            mem_read    = CONST.ISN_MEMREAD;
-            mem_write   = CONST.ISN_MEMWRITE;
-            alu_src     = CONST.FROM_IMM;
-            reg_write   = CONST.IS_REGWRITE;
-        end
-        CONST.I_LOAD : begin
-            is_branch   = CONST.ISN_BRANCH;
-            mem_to_reg  = CONST.MEM2REG_MEM;
-            pc_ctrl     = CONST.PCCTRL_PC_PLUS_4;
-            mem_read    = CONST.IS_MEMREAD;
-            mem_write   = CONST.ISN_MEMWRITE;
-            alu_src     = CONST.FROM_IMM;
-            reg_write   = CONST.IS_REGWRITE;
-        end
-        CONST.S_TYPE : begin
-            is_branch   = CONST.ISN_BRANCH;
-            mem_to_reg  = CONST.MEM2REG_MEM;
-            pc_ctrl     = CONST.PCCTRL_PC_PLUS_4;
-            mem_read    = CONST.ISN_MEMREAD;
-            mem_write   = CONST.IS_MEMWRITE;
-            alu_src     = CONST.FROM_IMM;
-            reg_write   = CONST.ISN_REGWRITE;
-        end
-        CONST.B_TYPE : begin
-            is_branch   = CONST.IS_BRANCH;
-            mem_to_reg  = CONST.MEM2REG_ALU;
-            pc_ctrl     = CONST.PCCTRL_PC_PLUS_IMM;
-            mem_read    = CONST.ISN_MEMREAD;
-            mem_write   = CONST.ISN_MEMWRITE;
-            alu_src     = CONST.FROM_RS2;
-            reg_write   = CONST.ISN_REGWRITE;
-        end
-        CONST.U_TYPE : begin
-            is_branch   = CONST.ISN_BRANCH;
-            mem_to_reg  = CONST.MEM2REG_PC_PLUS_IMM;
-            pc_ctrl     = CONST.PCCTRL_PC_PLUS_4;
-            mem_read    = CONST.ISN_MEMREAD;
-            mem_write   = CONST.ISN_MEMWRITE;
-            alu_src     = CONST.FROM_RS2;
-            reg_write   = CONST.IS_REGWRITE;
-        end
-        CONST.UJ_JAL : begin
-            is_branch   = CONST.ISN_BRANCH;
-            mem_to_reg  = CONST.MEM2REG_PC_PLUS_4;
-            pc_ctrl     = CONST.PCCTRL_PC_PLUS_IMM;
-            mem_read    = CONST.ISN_MEMREAD;
-            mem_write   = CONST.ISN_MEMWRITE;
-            alu_src     = CONST.FROM_IMM;
-            reg_write   = CONST.IS_REGWRITE;
-        end
-    endcase
+    always @(*) begin 
+        case(opcode)
+            `R_TYPE : begin
+                is_branch   = `ISN_BRANCH;
+                mem_to_reg  = `MEM2REG_ALU;
+                pc_ctrl     = `PCCTRL_PC_PLUS_4;
+                mem_read    = `ISN_MEMREAD;
+                mem_write   = `ISN_MEMWRITE;
+                alu_src     = `FROM_RS2;
+                reg_write   = `IS_REGWRITE;
+            end
+            `I_TYPE : begin
+                is_branch   = `ISN_BRANCH;
+                mem_to_reg  = `MEM2REG_ALU;
+                pc_ctrl     = `PCCTRL_PC_PLUS_4;
+                mem_read    = `ISN_MEMREAD;
+                mem_write   = `ISN_MEMWRITE;
+                alu_src     = `FROM_IMM;
+                reg_write   = `IS_REGWRITE;
+            end
+            `I_JALR : begin
+                is_branch   = `ISN_BRANCH;
+                mem_to_reg  = `MEM2REG_PC_PLUS_4;
+                pc_ctrl     = `PCCTRL_RS1_PLUS_IMM;
+                mem_read    = `ISN_MEMREAD;
+                mem_write   = `ISN_MEMWRITE;
+                alu_src     = `FROM_IMM;
+                reg_write   = `IS_REGWRITE;
+            end
+            `I_LOAD : begin
+                is_branch   = `ISN_BRANCH;
+                mem_to_reg  = `MEM2REG_MEM;
+                pc_ctrl     = `PCCTRL_PC_PLUS_4;
+                mem_read    = `IS_MEMREAD;
+                mem_write   = `ISN_MEMWRITE;
+                alu_src     = `FROM_IMM;
+                reg_write   = `IS_REGWRITE;
+            end
+            `S_TYPE : begin
+                is_branch   = `ISN_BRANCH;
+                mem_to_reg  = `MEM2REG_MEM;
+                pc_ctrl     = `PCCTRL_PC_PLUS_4;
+                mem_read    = `ISN_MEMREAD;
+                mem_write   = `IS_MEMWRITE;
+                alu_src     = `FROM_IMM;
+                reg_write   = `ISN_REGWRITE;
+            end
+            `B_TYPE : begin
+                is_branch   = `IS_BRANCH;
+                mem_to_reg  = `MEM2REG_ALU;
+                pc_ctrl     = `PCCTRL_PC_PLUS_IMM;
+                mem_read    = `ISN_MEMREAD;
+                mem_write   = `ISN_MEMWRITE;
+                alu_src     = `FROM_RS2;
+                reg_write   = `ISN_REGWRITE;
+            end
+            `U_TYPE : begin
+                is_branch   = `ISN_BRANCH;
+                mem_to_reg  = `MEM2REG_PC_PLUS_IMM;
+                pc_ctrl     = `PCCTRL_PC_PLUS_4;
+                mem_read    = `ISN_MEMREAD;
+                mem_write   = `ISN_MEMWRITE;
+                alu_src     = `FROM_RS2;
+                reg_write   = `IS_REGWRITE;
+            end
+            `UJ_JAL : begin
+                is_branch   = `ISN_BRANCH;
+                mem_to_reg  = `MEM2REG_PC_PLUS_4;
+                pc_ctrl     = `PCCTRL_PC_PLUS_IMM;
+                mem_read    = `ISN_MEMREAD;
+                mem_write   = `ISN_MEMWRITE;
+                alu_src     = `FROM_IMM;
+                reg_write   = `IS_REGWRITE;
+            end
+        endcase
+    end
 
 endmodule
 
@@ -460,35 +456,35 @@ module ALUControl(
 );
     always @(*) begin 
         case(opcode)
-            CONST.R_TYPE : begin
-                if(funct7 == 7'b0000001) alu_ctrl = CONST.MUL;
+            `R_TYPE : begin
+                if(funct7 == 7'b0000001) alu_ctrl = `MUL;
                 else begin
-                    case(funct3):
-                        3'b000: alu_ctrl = funct7 == 0 ? CONST.ADD : CONST.SUB;
-                        3'b001: alu_ctrl = CONST.SLL;
-                        3'b010: alu_ctrl = CONST.SLT;
-                        3'b011: alu_ctrl = CONST.SLTU;
-                        3'b100: alu_ctrl = CONST.XOR;
-                        3'b101: alu_ctrl = funct7 == 0 ? CONST.SRL : CONST.SRA;
-                        3'b110: alu_ctrl = CONST.OR;
-                        3'b111: alu_ctrl = CONST.AND;
+                    case(funct3)
+                        3'b000: alu_ctrl = funct7 == 0 ? `ADD : `SUB;
+                        3'b001: alu_ctrl = `SLL;
+                        3'b010: alu_ctrl = `SLT;
+                        3'b011: alu_ctrl = `SLTU;
+                        3'b100: alu_ctrl = `XOR;
+                        3'b101: alu_ctrl = funct7 == 0 ? `SRL : `SRA;
+                        3'b110: alu_ctrl = `OR;
+                        3'b111: alu_ctrl = `AND;
                     endcase
                 end
             end
-            CONST.I_TYPE : begin
-                case(funct3):
-                    3'b000: alu_ctrl = CONST.ADD;    // addi
-                    3'b001: alu_ctrl = CONST.SSL;    // slli
-                    3'b010: alu_ctrl = CONST.SLT;    // slti
-                    3'b011: alu_ctrl = CONST.SLTT;   // sltiu
-                    3'b100: alu_ctrl = CONST.XOR;    // xori
-                    3'b101: alu_ctrl = funct7 == 0 ? CONST.SRL : CONST.SRA; // srli, srai
-                    3'b110: alu_ctrl = CONST.OR;     // or
-                    3'b111: alu_ctrl = CONST.AND;    // andi
+            `I_TYPE : begin
+                case(funct3)
+                    3'b000: alu_ctrl = `ADD;    // addi
+                    3'b001: alu_ctrl = `SLL;    // slli
+                    3'b010: alu_ctrl = `SLT;    // slti
+                    3'b011: alu_ctrl = `SLTU;   // sltiu
+                    3'b100: alu_ctrl = `XOR;    // xori
+                    3'b101: alu_ctrl = funct7 == 0 ? `SRL : `SRA; // srli, srai
+                    3'b110: alu_ctrl = `OR;     // or
+                    3'b111: alu_ctrl = `AND;    // andi
                 endcase
             end
-            CONST.B_TYPE : alu_ctrl = CONST.SUB; // beq
-            default: alu_ctrl = CONST.ADD;
+            `B_TYPE : alu_ctrl = `SUB; // beq
+            default: alu_ctrl = `ADD;
         endcase
     end
     
