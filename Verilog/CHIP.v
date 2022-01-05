@@ -88,7 +88,7 @@ module CHIP(clk,
     wire   [ 4:0] rs1, rs2, rd;              //
     wire   [31:0] rs1_data    ;              //
     wire   [31:0] rs2_data    ;              //
-    wire   [31:0] rd_data     ;              //
+    reg    [31:0] rd_data     ;              //
     //---------------------------------------//
 
     // parse instruction
@@ -121,7 +121,7 @@ module CHIP(clk,
     wire alu_zero;
     wire alu_ready;
     wire [31:0] alu_result;
-    wire [31:0] alu_input2;
+    reg [31:0] alu_input2;
 
     //---------------------------------------//
     // Do not modify this part!!!            //
@@ -163,10 +163,12 @@ module CHIP(clk,
     );
 
     // select alu input2
-    case(alu_src)
-        `FROM_IMM: assign alu_input2 = extended_imm;
-        `FROM_RS2: assign alu_input2 = rs2_data;
-    endcase
+    always @(*) begin
+        case(alu_src)
+            `FROM_IMM: alu_input2 = extended_imm;
+            `FROM_RS2: alu_input2 = rs2_data;
+        endcase
+    end
 
     ALU alu(
         .clk(clk),
@@ -176,24 +178,26 @@ module CHIP(clk,
         .alu_ctrl(alu_ctrl),
         .result(alu_result),
         .alu_zero(alu_zero),
-        .alu_ready(alu_ready),
+        .alu_ready(alu_ready)
     );
 
     // select data written to reg
-    case(mem_to_reg)
-        MEM2REG_PC_PLUS_4: assign rd_data = PC + 4;
-        MEM2REG_ALU: assign rd_data = alu_result;
-        MEM2REG_MEM: assign rd_data = mem_rdata_D;
-        MEM2REG_PC_PLUS_IMM: assign rd_data = PC + extended_imm;
-    endcase
+    always @(*) begin
+        case(mem_to_reg)
+            `MEM2REG_PC_PLUS_4: rd_data = PC + 4;
+            `MEM2REG_ALU: rd_data = alu_result;
+            `MEM2REG_MEM: rd_data = mem_rdata_D;
+            `MEM2REG_PC_PLUS_IMM: rd_data = PC + extended_imm;
+        endcase
+    end
 
     // select next-state PC
     always @(*) begin
         if(alu_ready) begin
             case(pc_ctrl)
-                PCCTRL_PC_PLUS_IMM: PC_nxt = PC + extended_imm << 1;
-                PCCTRL_RS1_PLUS_IMM: PC_nxt = rs1_data + extended_imm;
-                PCCTRL_PC_PLUS_4: PC_nxt = PC + 4;
+                `PCCTRL_PC_PLUS_IMM: PC_nxt = PC + extended_imm << 1;
+                `PCCTRL_RS1_PLUS_IMM: PC_nxt = rs1_data + extended_imm;
+                `PCCTRL_PC_PLUS_4: PC_nxt = PC + 4;
             endcase
         end
         else PC_nxt = PC;
@@ -452,7 +456,7 @@ module ALUControl(
     input   [6:0]   opcode,
     input   [2:0]   funct3,
     input   [6:0]   funct7,
-    output  reg [4:0]   alu_ctrl,
+    output  reg [4:0]   alu_ctrl
 );
     always @(*) begin 
         case(opcode)
