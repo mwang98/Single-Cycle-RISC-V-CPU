@@ -212,7 +212,8 @@ module CHIP(clk,
     // Update PC
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) PC <= 32'h00010000; // Do not modify this value!!!
-        else PC <= PC_nxt;
+        else if(alu_ready)  PC <= PC_nxt;
+
     end
 
 endmodule
@@ -309,8 +310,8 @@ module ALU(
 
 
     // output logic
-    assign alu_ready = state_nxt == OUT;
-    assign result = state == OUT ? alu_result : 0;
+    assign alu_ready = alu_ctrl == `MUL ? ready : 1;
+    assign result = alu_ready ? alu_result : 0;
     assign alu_zero = state == OUT ? zeroout : 0;
 
     // MulDiv input
