@@ -198,6 +198,7 @@ module CHIP(clk,
                 `PCCTRL_PC_PLUS_IMM: PC_nxt = alu_zero ? (PC + (extended_imm << 1)) : PC + 4;
                 `PCCTRL_RS1_PLUS_IMM: PC_nxt = rs1_data + extended_imm;
                 `PCCTRL_PC_PLUS_4: PC_nxt = PC + 4;
+                default : PC_nxt = PC ;
             endcase
         end
         else PC_nxt = PC;
