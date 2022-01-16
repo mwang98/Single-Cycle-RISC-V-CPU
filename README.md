@@ -1,5 +1,5 @@
 # Single Cycle RISC-V CPU
-This project is a implementation of a single-cycle RISC-V CPU. Currently, we support various instructions listed in the following table.
+This project is a implementation of a single-cycle RISC-V CPU. Currently, we support various instructions listed in the following table. To see more details of implementation, please refer to the [report](./report.pdf).
 
 Type           | Instruction
 --------------|:-----:
@@ -15,4 +15,4 @@ UJ| JAL
 
 ![CPU_Architecture](./assets/cpu_arch.png)
 
-To see more details of implementation, please refer to the [report](./report.pdf).
+
