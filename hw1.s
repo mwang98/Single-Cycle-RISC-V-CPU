@@ -29,8 +29,8 @@ FUNCTION:
         addi  x10, x10, 5   # T(n) = 2T(n/2) + 8n +5
         jalr x0, 0(x1)      # return
 
-    addi x5, x10, 0
-
+    addi x5, x10, 0         #dummy code, branch instruction will not jump to here. 
+    
 # Do NOT modify this part!!!
 __start:
     la   t0, n
