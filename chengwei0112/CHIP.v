@@ -198,7 +198,7 @@ module CHIP(clk,
 
     // select next-state PC
     always @(*) begin
-        if(alu_ready) begin
+        if(alu_ready)begin
             case(pc_ctrl)
                 `PCCTRL_PC_PLUS_IMM: PC_nxt = (is_branch && !alu_zero) ?  PC_plus_4 : (PC + (extended_imm << 1));
                 `PCCTRL_RS1_PLUS_IMM: PC_nxt = alu_result;
@@ -206,7 +206,7 @@ module CHIP(clk,
                 default : PC_nxt = PC ;
             endcase
         end
-        else PC_nxt = PC;
+        else PC_nxt = PC ;
     end
 
     // output
@@ -218,7 +218,7 @@ module CHIP(clk,
     // Update PC
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) PC <= 32'h00010000; // Do not modify this value!!!
-        else if(alu_ready)  PC <= PC_nxt;
+        else PC <= PC_nxt;
 
     end
 
@@ -302,13 +302,9 @@ module ALU(
     output  alu_zero,
     output  alu_ready
 );
-    // Definition of states
-    parameter OUT  = 0;
-    parameter COMP = 1;
+
 
     reg [31:0] alu_result;
-    reg state, state_nxt;
-    reg zeroout;
     wire [63:0] muldiv_result;
     wire valid;
     wire mode;
@@ -318,7 +314,7 @@ module ALU(
     // output logic
     assign alu_ready = alu_ctrl == `MUL ? ready : 1;
     assign result = alu_ready ? alu_result : 0;
-    assign alu_zero = state == OUT ? zeroout : 0;
+    assign alu_zero = alu_ctrl == `SUB ? (alu_result == 0) : 1;
 
     // MulDiv input
     assign valid = (alu_ctrl == `MUL || alu_ctrl == `DIV);
@@ -335,13 +331,7 @@ module ALU(
         .out(muldiv_result)
     );
 
-    // next-state logic
-    always @(*) begin
-        case(state)
-            OUT: state_nxt = (alu_ctrl == `MUL || alu_ctrl == `DIV) ? COMP : OUT;
-            COMP: state_nxt = ready == 1 ? OUT : COMP;
-        endcase
-    end
+
 
     // combinational logic: ALU
     always @(*) begin
@@ -363,19 +353,6 @@ module ALU(
             `DIV: alu_result = muldiv_result[31:0];
             default: alu_result = 0;
         endcase
-    end
-
-    always @(*) begin
-        case(alu_ctrl)
-        `SUB : zeroout = alu_result == 0 ? 1 : 0;
-        default : zeroout =1;
-        endcase
-    end    
-
-    // sequential logic
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) state <= OUT;
-        else state <= state_nxt;
     end
 
 endmodule
