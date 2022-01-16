@@ -12,21 +12,21 @@
 `define SIZE_STACK 32 // You can change the size
 
 `ifdef leaf
-    `define MEM_TEXT "./leaf/leaf_text.txt"
-    `define MEM_DATA "./leaf/leaf_data.txt"
-    `define MEM_DATA_ANS "./leaf/leaf_data_ans.txt"
+    `define MEM_TEXT "./test/leaf/leaf_text.txt"
+    `define MEM_DATA "./test/leaf/leaf_data.txt"
+    `define MEM_DATA_ANS "./test/leaf/leaf_data_ans.txt"
 `endif
 
 `ifdef fact
-    `define MEM_TEXT "./fact/fact_text.txt"
-    `define MEM_DATA "./fact/fact_data.txt"
-    `define MEM_DATA_ANS "./fact/fact_data_ans.txt"
+    `define MEM_TEXT "./test/fact/fact_text.txt"
+    `define MEM_DATA "./test/fact/fact_data.txt"
+    `define MEM_DATA_ANS "./test/fact/fact_data_ans.txt"
 `endif
 
 `ifdef hw1
-    `define MEM_TEXT "./hw1/hw1_text.txt"
-    `define MEM_DATA "./hw1/hw1_data.txt"
-    `define MEM_DATA_ANS "./hw1/hw1_data_ans.txt"
+    `define MEM_TEXT "./test/hw1/hw1_text.txt"
+    `define MEM_DATA "./test/hw1/hw1_data.txt"
+    `define MEM_DATA_ANS "./test/hw1/hw1_data_ans.txt"
 `endif
 
 module Final_tb;
