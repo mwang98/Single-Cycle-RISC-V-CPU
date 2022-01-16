@@ -96,6 +96,7 @@ module CHIP(clk,
     wire    [6:0]   opcode;
     wire    [2:0]   funct3;
     wire    [6:0]   funct7;
+    wire    [31:0] PC_plus_4;
     assign opcode = mem_rdata_I[6:0];
     assign rd = mem_rdata_I[11:7];
     assign funct3 = mem_rdata_I[14:12];
@@ -103,6 +104,7 @@ module CHIP(clk,
     assign rs2 = mem_rdata_I[24:20];
     assign funct7 = mem_rdata_I[31:25];
     assign imm = mem_rdata_I[31:7];
+    assign PC_plus_4 = PC + 4;
 
     // control signal
     wire is_branch;
@@ -181,23 +183,26 @@ module CHIP(clk,
         .alu_ready(alu_ready)
     );
 
+    
+
     // select data written to reg
     always @(*) begin
         case(mem_to_reg)
-            `MEM2REG_PC_PLUS_4: rd_data = PC + 4;
+            `MEM2REG_PC_PLUS_4: rd_data = PC_plus_4;
             `MEM2REG_ALU: rd_data = alu_result;
             `MEM2REG_MEM: rd_data = mem_rdata_D;
             `MEM2REG_PC_PLUS_IMM: rd_data = PC + extended_imm;
         endcase
     end
 
+
     // select next-state PC
     always @(*) begin
         if(alu_ready) begin
             case(pc_ctrl)
-                `PCCTRL_PC_PLUS_IMM: PC_nxt = alu_zero ? (PC + (extended_imm << 1)) : PC + 4;
-                `PCCTRL_RS1_PLUS_IMM: PC_nxt = rs1_data + extended_imm;
-                `PCCTRL_PC_PLUS_4: PC_nxt = PC + 4;
+                `PCCTRL_PC_PLUS_IMM: PC_nxt = (is_branch && !alu_zero) ?  PC_plus_4 : (PC + (extended_imm << 1));
+                `PCCTRL_RS1_PLUS_IMM: PC_nxt = alu_result;
+                `PCCTRL_PC_PLUS_4: PC_nxt = PC_plus_4;
                 default : PC_nxt = PC ;
             endcase
         end
