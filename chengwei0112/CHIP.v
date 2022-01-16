@@ -218,7 +218,7 @@ module CHIP(clk,
     // Update PC
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) PC <= 32'h00010000; // Do not modify this value!!!
-        else PC <= PC_nxt;
+        else if(alu_ready) PC <= PC_nxt;
 
     end
 
