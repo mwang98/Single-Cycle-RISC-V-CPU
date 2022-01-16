@@ -96,6 +96,7 @@ module CHIP(clk,
     wire    [6:0]   opcode;
     wire    [2:0]   funct3;
     wire    [6:0]   funct7;
+    wire    [31:0] PC_plus_4;
     assign opcode = mem_rdata_I[6:0];
     assign rd = mem_rdata_I[11:7];
     assign funct3 = mem_rdata_I[14:12];
@@ -103,6 +104,7 @@ module CHIP(clk,
     assign rs2 = mem_rdata_I[24:20];
     assign funct7 = mem_rdata_I[31:25];
     assign imm = mem_rdata_I[31:7];
+    assign PC_plus_4 = PC + 4;
 
     // control signal
     wire is_branch;
@@ -181,38 +183,43 @@ module CHIP(clk,
         .alu_ready(alu_ready)
     );
 
+    
+
     // select data written to reg
     always @(*) begin
         case(mem_to_reg)
-            `MEM2REG_PC_PLUS_4: rd_data = PC + 4;
+            `MEM2REG_PC_PLUS_4: rd_data = PC_plus_4;
             `MEM2REG_ALU: rd_data = alu_result;
             `MEM2REG_MEM: rd_data = mem_rdata_D;
             `MEM2REG_PC_PLUS_IMM: rd_data = PC + extended_imm;
         endcase
     end
 
+
     // select next-state PC
     always @(*) begin
-        if(alu_ready) begin
+        if(alu_ready)begin
             case(pc_ctrl)
-                `PCCTRL_PC_PLUS_IMM: PC_nxt = PC + extended_imm << 1;
-                `PCCTRL_RS1_PLUS_IMM: PC_nxt = rs1_data + extended_imm;
-                `PCCTRL_PC_PLUS_4: PC_nxt = PC + 4;
+                `PCCTRL_PC_PLUS_IMM: PC_nxt = (is_branch && !alu_zero) ?  PC_plus_4 : (PC + (extended_imm << 1));
+                `PCCTRL_RS1_PLUS_IMM: PC_nxt = alu_result;
+                `PCCTRL_PC_PLUS_4: PC_nxt = PC_plus_4;
+                default : PC_nxt = PC ;
             endcase
         end
-        else PC_nxt = PC;
+        else PC_nxt = PC ;
     end
 
     // output
     assign mem_wen_D = mem_write;
     assign mem_addr_D = alu_result;
-    assign mem_wdata_D = mem_write ? rs2_data : 0;
+    assign mem_wdata_D =  rs2_data;
     assign mem_addr_I = PC;
 
     // Update PC
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) PC <= 32'h00010000; // Do not modify this value!!!
         else PC <= PC_nxt;
+
     end
 
 endmodule
@@ -295,25 +302,23 @@ module ALU(
     output  alu_zero,
     output  alu_ready
 );
-    // Definition of states
-    parameter OUT  = 0;
-    parameter COMP = 1;
+
 
     reg [31:0] alu_result;
-    reg state, state_nxt;
     wire [63:0] muldiv_result;
     wire valid;
     wire mode;
     wire ready;
 
+
     // output logic
-    assign alu_ready = state == OUT;
-    assign result = state == OUT ? alu_result : 0;
-    assign alu_zero = state == OUT ? alu_result == 0 : 0;
+    assign alu_ready = alu_ctrl == `MUL ? ready : 1;
+    assign result = alu_ready ? alu_result : 0;
+    assign alu_zero = alu_ctrl == `SUB ? (alu_result == 0) : 1;
 
     // MulDiv input
     assign valid = (alu_ctrl == `MUL || alu_ctrl == `DIV);
-    assign mode = alu_ctrl == `MUL;
+    assign mode = alu_ctrl == `MUL ? 0 : 1;
 
     MulDiv muldiv(
         .clk(clk),
@@ -326,13 +331,7 @@ module ALU(
         .out(muldiv_result)
     );
 
-    // next-state logic
-    always @(*) begin
-        case(state)
-            OUT: state_nxt = (alu_ctrl == `MUL || alu_ctrl == `DIV) ? COMP : OUT;
-            COMP: state_nxt = ready == 1 ? OUT : COMP;
-        endcase
-    end
+
 
     // combinational logic: ALU
     always @(*) begin
@@ -341,7 +340,7 @@ module ALU(
             `SUB: alu_result = input1 - input2;
             `SLL: alu_result = input1 << input2;
             `SLT: begin
-                if(input1[31] ^ input2[31]) alu_result = input1[31] == 0;
+                if(input1[31] ^ input2[31]) alu_result = input1[31] == 1;
                 else alu_result = input1[31] == 0 ? input1 < input2 : input1 > input2;
             end
             `SLTU: alu_result = input1 < input2;
@@ -351,14 +350,9 @@ module ALU(
             `OR: alu_result = input1 | input2;
             `AND: alu_result = input1 & input2;
             `MUL: alu_result = muldiv_result[31:0];
+            `DIV: alu_result = muldiv_result[31:0];
             default: alu_result = 0;
         endcase
-    end
-
-    // sequential logic
-    always @(posedge clk) begin
-        if (!rst_n) state <= OUT;
-        else state <= state_nxt;
     end
 
 endmodule
@@ -447,6 +441,15 @@ module Control(
                 alu_src     = `FROM_IMM;
                 reg_write   = `IS_REGWRITE;
             end
+            default : begin
+                is_branch   = 0;
+                mem_to_reg  = 0;
+                pc_ctrl     = 0;
+                mem_read    = 0;
+                mem_write   = 0;
+                alu_src     = 0;
+                reg_write   = 0;
+            end
         endcase
     end
 
@@ -461,7 +464,8 @@ module ALUControl(
     always @(*) begin 
         case(opcode)
             `R_TYPE : begin
-                if(funct7 == 7'b0000001) alu_ctrl = `MUL;
+                if(funct7 == 7'b0000001)
+                    alu_ctrl = (funct3==3'b000) ? `MUL : `DIV;
                 else begin
                     case(funct3)
                         3'b000: alu_ctrl = funct7 == 0 ? `ADD : `SUB;
